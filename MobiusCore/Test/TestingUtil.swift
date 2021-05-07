@@ -195,3 +195,34 @@ class TestEventSource<Event>: EventSource {
         }
     }
 }
+
+final class MockConnectable: Connectable {
+    var disposed = false
+
+    func connect(_ consumer: @escaping (String) -> Void) -> Connection<String> {
+        return Connection(acceptClosure: { _ in }, disposeClosure: { self.disposed = true })
+    }
+}
+
+final class MockConsumerConnectable: Connectable {
+    class ConsumerWrapper {
+        var consumer: ((String) -> Void)?
+    }
+
+    // reference to the loop.model without retaining it
+    // used to determine whether the loop is still alive
+    private(set) weak var model: NSObject?
+
+    // instance to retain the consumer passed to the connectable
+    private let consumerWrapper: ConsumerWrapper
+
+    init(consumerWrapper: ConsumerWrapper) {
+        self.consumerWrapper = consumerWrapper
+    }
+
+    func connect(_ consumer: @escaping (String) -> Void) -> Connection<NSObject> {
+        consumerWrapper.consumer = consumer
+        return Connection(acceptClosure: { self.model = $0 }, disposeClosure: {})
+    }
+}
+

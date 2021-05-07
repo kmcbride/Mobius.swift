@@ -244,5 +244,28 @@ public enum Mobius {
                 viewQueue: viewQueue
             )
         }
+
+        /// Create a `MobiusManagedLoop` from the builder.
+        ///
+        /// - Parameters:
+        ///   - initialModel: The initial default model of the `MobiusManagedLoop`
+        ///   - initiate: An optional initiator function to invoke each time the loop is started.
+        ///   - targetQueue: The target queue for the `MobiusManagedLoop`’s work. The loop will dispatch events and
+        ///     and effects on a serial queue that targets this queue. Default: `.userInitiated` global queue.
+        public func makeManagedLoop(
+            from initialModel: Model,
+            initiate: Initiate<Model, Effect>? = nil,
+            targetQueue: DispatchQueue = .global(qos: .userInitiated)
+        ) -> MobiusManagedLoop<Model, Event, Effect> {
+            return MobiusManagedLoop(
+                model: initialModel,
+                update: update,
+                eventSource: eventSource,
+                effectHandler: effectHandler,
+                logger: logger,
+                targetQueue: targetQueue,
+                initiate: initiate
+            )
+        }
     }
 }
