@@ -170,6 +170,8 @@
 		F518CA0B25E04C0B0051BB0C /* Nimble.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = F518C78D25E0241E0051BB0C /* Nimble.xcframework */; };
 		F518CA0C25E04C0B0051BB0C /* Nimble.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F518C78D25E0241E0051BB0C /* Nimble.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F518CA7B25E051840051BB0C /* Nimble.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = F518C78D25E0241E0051BB0C /* Nimble.xcframework */; };
+		F5920E7F26408DE8003FCE6D /* MobiusManagedLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5920E7E26408DE8003FCE6D /* MobiusManagedLoop.swift */; };
+		F5920E812640915B003FCE6D /* MobiusManagedLoopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5920E802640915B003FCE6D /* MobiusManagedLoopTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -406,6 +408,8 @@
 		DD748324212DEEC1008EEECD /* CopyableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyableTests.swift; sourceTree = "<group>"; };
 		F518C77125E0241A0051BB0C /* Quick.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Quick.xcframework; path = Carthage/Build/Quick.xcframework; sourceTree = "<group>"; };
 		F518C78D25E0241E0051BB0C /* Nimble.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Nimble.xcframework; path = Carthage/Build/Nimble.xcframework; sourceTree = "<group>"; };
+		F5920E7E26408DE8003FCE6D /* MobiusManagedLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobiusManagedLoop.swift; sourceTree = "<group>"; };
+		F5920E802640915B003FCE6D /* MobiusManagedLoopTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobiusManagedLoopTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -659,15 +663,16 @@
 		5BB287B4209995410043B530 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				02D0DDBC2366EF8D00A1CE4C /* EffectHandlers */,
 				5BB287BC209995410043B530 /* Disposables */,
+				02D0DDBC2366EF8D00A1CE4C /* EffectHandlers */,
 				5B4A369821107D0E00279C7D /* EventSources */,
+				2D3F26EC237B02B8004C2B75 /* AsyncDispatchQueueConnectable.swift */,
 				2D3EEB9523FADA9E006E478A /* AsyncStartStopStateMachine.swift */,
+				2D3A69652354AC820053C95E /* ConcurrentAccessDetector.swift */,
 				5B237EB9209C4F3C00764576 /* Connectable.swift */,
 				5BB287BA209995410043B530 /* ConnectablePublisher.swift */,
 				5BB287B6209995410043B530 /* Connection.swift */,
 				5BB287B7209995410043B530 /* Consumer.swift */,
-				2D3F26EC237B02B8004C2B75 /* AsyncDispatchQueueConnectable.swift */,
 				5BB287BB209995410043B530 /* First.swift */,
 				5BB287CA209995410043B530 /* Lock.swift */,
 				2D15DF72238EA4DD00E78B27 /* LoggingAdaptors.swift */,
@@ -676,8 +681,8 @@
 				5BB287B9209995410043B530 /* MobiusHooks.swift */,
 				5BB287C9209995410043B530 /* MobiusLogger.swift */,
 				5BB287B8209995410043B530 /* MobiusLoop.swift */,
+				F5920E7E26408DE8003FCE6D /* MobiusManagedLoop.swift */,
 				5BB287B5209995410043B530 /* Next.swift */,
-				2D3A69652354AC820053C95E /* ConcurrentAccessDetector.swift */,
 				2D3A6972235737430053C95E /* WorkBag.swift */,
 			);
 			path = Source;
@@ -752,6 +757,7 @@
 				5B85AD0020AAA87D00C4FCD5 /* MobiusHooksTests.swift */,
 				5BB2884C20999ACE0043B530 /* MobiusIntegrationTests.swift */,
 				5BB2885820999ACE0043B530 /* MobiusLoopTests.swift */,
+				F5920E802640915B003FCE6D /* MobiusManagedLoopTests.swift */,
 				5BB2885420999ACE0043B530 /* NextTests.swift */,
 				2DB61AFC23A8F485009E55DB /* NonReentrancyTests.swift */,
 				2D25B99824337B0E0077FB07 /* TestingErrorHandler.swift */,
@@ -1247,6 +1253,7 @@
 				02CAE47223C76F34009DFF9A /* EffectCallback.swift in Sources */,
 				5B4A369A21107D2600279C7D /* AnyEventSource.swift in Sources */,
 				2D3EEB9623FADA9E006E478A /* AsyncStartStopStateMachine.swift in Sources */,
+				F5920E7F26408DE8003FCE6D /* MobiusManagedLoop.swift in Sources */,
 				2D3F26ED237B02B8004C2B75 /* AsyncDispatchQueueConnectable.swift in Sources */,
 				5BB2881A2099957D0043B530 /* MobiusLoop.swift in Sources */,
 				02C4061D2373078400BD7ED8 /* EffectExecutor.swift in Sources */,
@@ -1293,6 +1300,7 @@
 				5BB2887B20999AD60043B530 /* ConnectablePublisherTests.swift in Sources */,
 				5BB2887620999AD60043B530 /* NextTests.swift in Sources */,
 				2D24D15323FAE746005D175E /* AnonymousDisposableTests.swift in Sources */,
+				F5920E812640915B003FCE6D /* MobiusManagedLoopTests.swift in Sources */,
 				5BB2886E20999AD60043B530 /* MobiusIntegrationTests.swift in Sources */,
 				5BB2887720999AD60043B530 /* FirstTests.swift in Sources */,
 				2DA9A41E23FAEA4800BF5534 /* AnyEffectHandlerTests.swift in Sources */,

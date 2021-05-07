@@ -401,7 +401,7 @@ class MobiusControllerTests: QuickSpec {
     }
 }
 
-class MockConnectable: Connectable {
+private class MockConnectable: Connectable {
     var disposed = false
 
     func connect(_ consumer: @escaping (String) -> Void) -> Connection<String> {
@@ -409,7 +409,7 @@ class MockConnectable: Connectable {
     }
 }
 
-class MockConsumerConnectable: Connectable {
+private class MockConsumerConnectable: Connectable {
     class ConsumerWrapper {
         var consumer: ((String) -> Void)?
     }
