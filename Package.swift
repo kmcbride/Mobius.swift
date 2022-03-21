@@ -1,13 +1,13 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.1
 import PackageDescription
 
 let package = Package(
     name: "Mobius",
     platforms: [
-        .iOS(.v10),
-        .macOS(.v10_12),
-        .tvOS(.v10),
-        .watchOS(.v3),
+        .iOS(.v13),
+        .macOS(.v10_15),
+        .tvOS(.v13),
+        .watchOS(.v6),
     ],
     products: [
         .library(name: "MobiusCore", targets: ["MobiusCore"]),
