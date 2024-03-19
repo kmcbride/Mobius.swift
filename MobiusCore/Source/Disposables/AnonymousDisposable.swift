@@ -12,13 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Foundation
-
 /// The `AnonymousDisposable` class implements a `Disposable` type that disposes of resources via a closure.
-public final class AnonymousDisposable: MobiusCore.Disposable {
-    /// The closure which disposes of the object.
-    private var disposer: (() -> Void)?
-    private let lock = DispatchQueue(label: "Mobius.AnonymousDisposable")
+public final class AnonymousDisposable: Disposable {
+    private let disposable: Synchronized<(() -> Void)?>?
 
     /// Creates a type-erased `AnonymousDisposable` that wraps the given instance.
     public convenience init<Disposable: MobiusCore.Disposable>(_ base: Disposable) {
@@ -35,17 +31,17 @@ public final class AnonymousDisposable: MobiusCore.Disposable {
     ///
     /// - Parameter disposer: The code which disposes of the resources.
     public init(disposer: @escaping () -> Void) {
-        self.disposer = disposer
+        disposable = Synchronized(value: disposer)
+    }
+
+    public init() {
+        disposable = nil
     }
 
     public func dispose() {
-        var disposer: (() -> Void)?
-
-        lock.sync {
-            disposer = self.disposer
-            self.disposer = nil
+        disposable?.mutate { disposer in
+            disposer?()
+            disposer = nil
         }
-
-        disposer?()
     }
 }
