@@ -3,21 +3,30 @@
 
 import Foundation
 
-struct Lock {
-    private let lock = NSRecursiveLock()
+final class Lock {
+    private let lock: os_unfair_lock_t
 
+    init() {
+        lock = .allocate(capacity: 1)
+        lock.initialize(to: os_unfair_lock())
+    }
+
+    deinit {
+        lock.deinitialize(count: 1)
+        lock.deallocate()
+    }
+
+    @discardableResult
     func synchronized<Result>(closure: () throws -> Result) rethrows -> Result {
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
+        os_unfair_lock_lock(lock)
+        defer { os_unfair_lock_unlock(lock) }
 
         return try closure()
     }
 }
 
 final class Synchronized<Value> {
-    private let lock = DispatchQueue(label: "Mobius synchronized storage")
+    private let lock = Lock()
     private var storage: Value
 
     init(value: Value) {
@@ -26,21 +35,21 @@ final class Synchronized<Value> {
 
     var value: Value {
         get {
-            return lock.sync { storage }
+            lock.synchronized { storage }
         }
-        set(newValue) {
-            lock.sync { self.storage = newValue }
+        set {
+            lock.synchronized { storage = newValue }
         }
     }
 
     func mutate(with closure: (inout Value) throws -> Void) rethrows {
-        try lock.sync {
+        try lock.synchronized {
             try closure(&storage)
         }
     }
 
     func read(in closure: (Value) throws -> Void) rethrows {
-        try lock.sync {
+        try lock.synchronized {
             try closure(storage)
         }
     }

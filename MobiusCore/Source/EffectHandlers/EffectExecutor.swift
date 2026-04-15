@@ -1,8 +1,6 @@
 // Copyright Spotify AB.
 // SPDX-License-Identifier: Apache-2.0
 
-import Foundation
-
 final class EffectExecutor<Effect, Event>: Connectable {
     private let handleEffect: (Effect, EffectCallback<Event>) -> Disposable
     private var output: Consumer<Event>?
@@ -20,22 +18,29 @@ final class EffectExecutor<Effect, Event>: Connectable {
     }
 
     func connect(_ consumer: @escaping Consumer<Event>) -> Connection<Effect> {
-        return lock.synchronized {
+        let needsConnection = lock.synchronized {
             guard output == nil else {
-                MobiusHooks.errorHandler(
-                    "Connection limit exceeded: The Connectable \(type(of: self)) is already connected. " +
-                    "Unable to connect more than once",
-                    #file,
-                    #line
-                )
+                return false
             }
 
             output = consumer
-            return Connection(
-                acceptClosure: handle,
-                disposeClosure: dispose
+
+            return true
+        }
+
+        guard needsConnection else {
+            MobiusHooks.errorHandler(
+                "Connection limit exceeded: The Connectable \(type(of: self)) is already connected. " +
+                "Unable to connect more than once",
+                #file,
+                #line
             )
         }
+
+        return Connection(
+            acceptClosure: handle,
+            disposeClosure: dispose
+        )
     }
 
     func handle(_ effect: Effect) {
@@ -47,7 +52,7 @@ final class EffectExecutor<Effect, Event>: Connectable {
         let callback = EffectCallback(
             // Any events produced as a result of handling the effect will be sent to this class's `output` consumer,
             // unless it has already been disposed.
-            onSend: { [weak self] event in self?.output?(event) },
+            onSend: { [weak self] event in self?.dispatch(event: event) },
             // Once an effect has been handled, remove the reference to its callback and disposable.
             onEnd: { [weak self] in self?.delete(id: id) }
         )
@@ -63,18 +68,27 @@ final class EffectExecutor<Effect, Event>: Connectable {
     }
 
     func dispose() {
-        lock.synchronized {
-            // Dispose any effects currently being handled. We also need to `end` their callbacks to remove the
-            // references we are keeping to them.
-            handlingEffects.values
-                .forEach {
-                    $0.disposable.dispose()
-                    $0.callback.end()
-                }
+        let handlingEffectStates = lock.synchronized {
+            let states = handlingEffects.values
 
             // Restore the state of this `Connectable` to its pre-connected state.
             handlingEffects = [:]
             output = nil
+
+            return states
+        }
+
+        // Dispose any effects currently being handled. We also need to `end` their callbacks to remove the
+        // references we are keeping to them.
+        handlingEffectStates.forEach {
+            $0.disposable.dispose()
+            $0.callback.end()
+        }
+    }
+
+    private func dispatch(event: Event) {
+        if let output = lock.synchronized(closure: { output }) {
+            output(event)
         }
     }
 

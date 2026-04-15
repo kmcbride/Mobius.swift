@@ -187,6 +187,46 @@ class EffectRouterTests: QuickSpec {
             }
         }
 
+        context("Synchronous event emission during connect") {
+            it("should not deadlock when inner connectable emits synchronously during connect") {
+                var receivedEvents: [Event] = []
+
+                let connectable = TestConnectable(
+                    dispatchEventsOnConnect: [.eventForEffect1]
+                )
+
+                let connection = EffectRouter<Effect, Event>()
+                    .routeEffects(equalTo: .effect1).to(connectable)
+                    .asConnectable
+                    .connect { event in
+                        receivedEvents.append(event)
+                    }
+
+                expect(receivedEvents).to(equal([.eventForEffect1]))
+
+                connection.dispose()
+            }
+
+            it("should forward multiple synchronous events emitted during connect") {
+                var receivedEvents: [Event] = []
+
+                let connectable = TestConnectable(
+                    dispatchEventsOnConnect: [.eventForEffect1, .eventForEffect2]
+                )
+
+                let connection = EffectRouter<Effect, Event>()
+                    .routeEffects(equalTo: .effect1).to(connectable)
+                    .asConnectable
+                    .connect { event in
+                        receivedEvents.append(event)
+                    }
+
+                expect(receivedEvents).to(equal([.eventForEffect1, .eventForEffect2]))
+
+                connection.dispose()
+            }
+        }
+
         context("Running on different queues") {
             it("supports handling effects on a specified queue") {
                 let testQueue = DispatchQueue(label: "test")
@@ -215,21 +255,27 @@ class EffectRouterTests: QuickSpec {
 
 private class TestConnectable: Connectable {
     private let event: Event
+    private let eventsOnConnect: [Event]
     private let onDispose: () -> Void
     private let onEvent: () -> Void
 
     init(
         dispatchEvent event: Event = .eventForEffect1,
+        dispatchEventsOnConnect eventsOnConnect: [Event] = [],
         onDispose: @escaping () -> Void = {},
         onEvent: @escaping () -> Void = {}
     ) {
         self.event = event
+        self.eventsOnConnect = eventsOnConnect
         self.onDispose = onDispose
         self.onEvent = onEvent
     }
 
     func connect(_ consumer: @escaping (Event) -> Void) -> Connection<Effect> {
-        Connection(
+        for event in eventsOnConnect {
+            consumer(event)
+        }
+        return Connection(
             acceptClosure: { _ in
                 self.onEvent()
                 consumer(self.event)

@@ -14,24 +14,33 @@ final class ThreadSafeConnectable<Event, Effect>: Connectable {
         self.connectable = AnyConnectable(connectable)
     }
 
-    func connect(_ output: @escaping (Event) -> Void) -> Connection<Effect> {
-        return lock.synchronized {
-            guard self.output == nil, connection == nil else {
-                MobiusHooks.errorHandler(
-                    "Connection limit exceeded: The Connectable \(type(of: self)) is already connected. " +
-                    "Unable to connect more than once",
-                    #file,
-                    #line
-                )
+    func connect(_ consumer: @escaping Consumer<Event>) -> Connection<Effect> {
+        let needsConnection = lock.synchronized {
+            guard output == nil else {
+                return false
             }
-            self.output = output
-            connection = connectable.connect(self.dispatch)
 
-            return Connection(
-                acceptClosure: accept,
-                disposeClosure: dispose
+            output = consumer
+
+            return true
+        }
+
+        guard needsConnection else {
+            MobiusHooks.errorHandler(
+                "Connection limit exceeded: The Connectable \(type(of: self)) is already connected. " +
+                "Unable to connect more than once",
+                #file,
+                #line
             )
         }
+
+        let innerConnection = connectable.connect(dispatch)
+        lock.synchronized { connection = innerConnection }
+
+        return Connection(
+            acceptClosure: accept,
+            disposeClosure: dispose
+        )
     }
 
     private func accept(_ effect: Effect) {
