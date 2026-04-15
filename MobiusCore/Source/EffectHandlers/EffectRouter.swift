@@ -148,19 +148,26 @@ private func compose<Input, Output>(
 
         return Connection(
             acceptClosure: { effect in
-                let handlers = connectedRoutes
-                    .compactMap { route in route.tryToHandle(effect) }
+                var handler: (() -> Void)?
+                var handlerCount = 0
 
-                if let handleEffect = handlers.first, handlers.count == 1 {
-                    handleEffect()
-                } else {
+                for route in connectedRoutes {
+                    if let routeHandler = route.tryToHandle(effect) {
+                        handler = routeHandler
+                        handlerCount += 1
+                    }
+                }
+
+                guard let handler, handlerCount == 1 else {
                     MobiusHooks.errorHandler(
-                        "Error: \(handlers.count) EffectHandlers could be found for effect: \(effect). " +
+                        "Error: \(handlerCount) EffectHandlers could be found for effect: \(effect). " +
                         "Exactly 1 is required.",
                         #file,
                         #line
                     )
                 }
+
+                handler()
             },
             disposeClosure: {
                 connectedRoutes
